@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_navigation/src/routes/transitions_type.dart';
 import 'package:kmerchant/splash.dart';
 import 'package:kmerchant/theme.dart';
+import 'package:kmerchant/helper/app_bindings.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(MyApp());
 }
 
@@ -10,10 +15,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: kAppTheme,
+    return GetMaterialApp(
+      initialBinding: AppBinding(),
       debugShowCheckedModeBanner: false,
+      defaultTransition: Transition.fadeIn,
+      theme: kAppTheme,
       home: SplashScreen(),
     );
   }

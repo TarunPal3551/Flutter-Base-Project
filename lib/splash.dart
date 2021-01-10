@@ -22,19 +22,23 @@ class SplashScreen extends StatelessWidget {
         initState: (_) {
           Get.put(SplashController()).handleStartUpLogic().then((value) {
             //checkForUpdate(_);
-            if (ACCESS_TOKEN == null) {
-              Get.offAll(MainHome());
-            } else {
-              Get.offAll(MainHome());
-            }
+            // if (ACCESS_TOKEN == null) {
+            //   Get.offAll(MainHome());
+            // } else {
+            //   Get.offAll(MainHome());
+            // }
+            Get.offAll(MainHome());
           });
         },
         builder: (_) => Scaffold(
               body: Container(
+                  color: kAppTheme.accentColor,
                   width: double.infinity,
-                  child: Image.asset(
-                    "assets/images/splash.jpeg",
-                    fit: BoxFit.fitWidth,
+                  height: double.infinity,
+                  child: Icon(
+                    Icons.shopping_bag_rounded,
+                    size: 100,
+                    color: Colors.white,
                   )),
             ));
   }

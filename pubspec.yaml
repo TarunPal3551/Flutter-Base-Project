@@ -41,6 +41,7 @@ dependencies:
   geocoding: ^1.0.5
   dio: 3.0.10
   pretty_dio_logger: ^1.1.1
+  shimmer: ^1.1.2
 
 dev_dependencies:
   flutter_test:
