@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
-
 const String kRupeeSymbol = "₹";
 
-const String BASE_URL = "https://urbanecare.com/panel/public/";
+const String BASE_URL =
+    "http://restaurant.sikarwar1.xyz/restomulti/merchantappv2/";
 
-const String IMAGE_BASE = "http://urbanecare.com/panel/public/storage/";
+const String IMAGE_BASE =
+    "http://restaurant.sikarwar1.xyz/restomulti/merchantappv2/";
 
 String ACCESS_TOKEN;
-
-
+String API_KEY = "test";
+String lang = "en";
 
 String DEVICE_ID;
 
@@ -22,8 +23,6 @@ double LATITUDE;
 double LONGITUDE;
 
 String FULL_ADDRESS;
-
-
 
 const Color appColor = Color(0xff1d1e55);
 

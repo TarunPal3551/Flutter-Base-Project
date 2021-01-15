@@ -7,45 +7,26 @@ import 'package:kmerchant/models/itemcategory.dart';
 import 'package:kmerchant/ui/components/cached_network_image.dart';
 import 'package:kmerchant/ui/components/custom_containers.dart';
 import 'package:kmerchant/ui/components/loading_dialog.dart';
+import 'package:kmerchant/ui/screens/addoncategory_form.dart';
 import 'package:kmerchant/ui/screens/category_form.dart';
 
 import '../../theme.dart';
 
-class CategoryList extends StatefulWidget {
+class AddOnCategoryList extends StatefulWidget {
   static const id = 'category_screen';
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return CategoryListState();
+    return AddOnCategoryListState();
   }
 }
 
-class CategoryListState extends State<CategoryList> {
-  List<Data> categoryList = List();
+class AddOnCategoryListState extends State<AddOnCategoryList> {
+  List<Data> categoryList;
   ItemCategoryController categoryController = ItemCategoryController();
-
-  void getCategoryList() {
-    categoryController.getAllItemCategory().then((value) {
-      if (value != null) {
-        if (Get.isDialogOpen) Get.back();
-        categoryList = value.data;
-        //Get.offAndToNamed(MyHomePage.id);
-        setState(() {});
-      } else {
-        if (Get.isDialogOpen) Get.back();
-        Get.snackbar("Loading Failed", "No Data Found",
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
-      }
-    });
-  }
-
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     getCategoryList();
   }
@@ -57,7 +38,8 @@ class CategoryListState extends State<CategoryList> {
         backgroundColor: kAppBarColor,
         appBar: AppBar(
             backgroundColor: Colors.white,
-            title: Text("All Category", style: TextStyle(color: Colors.black))),
+            title: Text("All Addon Category",
+                style: TextStyle(color: Colors.black))),
         body: Scaffold(
           body: Column(
             children: [
@@ -73,29 +55,23 @@ class CategoryListState extends State<CategoryList> {
         ));
   }
 
-  Widget dialogBox() {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      elevation: 5,
-      backgroundColor: Colors.transparent,
-      child: ListView(
-        children: [Text("Edit"), Text("Delete")],
-      ),
-    );
-  }
-
-  Widget _buildCategoryList() {
-    return GridView.builder(
-      gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-      physics: const BouncingScrollPhysics(),
-      itemBuilder: (context, index) {
-        return CategoryCard(categoryList.elementAt(index));
-      },
-      itemCount: categoryList.length,
-    );
+  void getCategoryList() {
+    Get.dialog(LoadingDialog(), barrierDismissible: false);
+    categoryController.getAllItemCategory().then((value) {
+      if (value != null) {
+        if (Get.isDialogOpen) Get.back();
+        categoryList = value.data;
+        //Get.offAndToNamed(MyHomePage.id);
+        setState(() {});
+      } else {
+        if (Get.isDialogOpen) Get.back();
+        Get.snackbar("Loading Failed", "No Data Found",
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+      }
+    });
   }
 
   Widget CategoryCard(Data elementAt) {
@@ -122,17 +98,12 @@ class CategoryListState extends State<CategoryList> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => CategoryForm(
-                                    elementAt,
-                                  )),
+                              builder: (context) => AddOnCategoryForm()),
                         );
                       },
-                      child: Container(
-                        width: double.infinity,
-                        child: Text(
-                          "Edit",
-                          style: TextStyle(color: Colors.black, fontSize: 20),
-                        ),
+                      child: Text(
+                        "Edit",
+                        style: TextStyle(color: Colors.black, fontSize: 20),
                       ),
                     ),
                     SizedBox(
@@ -217,6 +188,31 @@ class CategoryListState extends State<CategoryList> {
           )
         ],
       ),
+    );
+  }
+
+  Widget dialogBox() {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      elevation: 5,
+      backgroundColor: Colors.transparent,
+      child: ListView(
+        children: [Text("Edit"), Text("Delete")],
+      ),
+    );
+  }
+
+  Widget _buildCategoryList() {
+    return GridView.builder(
+      gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+      physics: const BouncingScrollPhysics(),
+      itemBuilder: (context, index) {
+        return CategoryCard(categoryList.elementAt(index));
+      },
+      itemCount: categoryList.length,
     );
   }
 }

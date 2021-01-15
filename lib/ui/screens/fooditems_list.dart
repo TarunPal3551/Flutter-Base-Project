@@ -1,55 +1,24 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:kmerchant/controllers/itemcategory_controller.dart';
-import 'package:kmerchant/models/itemcategory.dart';
 import 'package:kmerchant/ui/components/cached_network_image.dart';
 import 'package:kmerchant/ui/components/custom_containers.dart';
-import 'package:kmerchant/ui/components/loading_dialog.dart';
+import 'package:kmerchant/ui/screens/addoncategory_form.dart';
 import 'package:kmerchant/ui/screens/category_form.dart';
 
 import '../../theme.dart';
 
-class CategoryList extends StatefulWidget {
+class AddOnCategoryList extends StatefulWidget {
   static const id = 'category_screen';
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return CategoryListState();
+    return AddOnCategoryListState();
   }
 }
 
-class CategoryListState extends State<CategoryList> {
-  List<Data> categoryList = List();
-  ItemCategoryController categoryController = ItemCategoryController();
-
-  void getCategoryList() {
-    categoryController.getAllItemCategory().then((value) {
-      if (value != null) {
-        if (Get.isDialogOpen) Get.back();
-        categoryList = value.data;
-        //Get.offAndToNamed(MyHomePage.id);
-        setState(() {});
-      } else {
-        if (Get.isDialogOpen) Get.back();
-        Get.snackbar("Loading Failed", "No Data Found",
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
-            snackPosition: SnackPosition.BOTTOM,
-            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
-      }
-    });
-  }
-
-  @override
-  void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
-    super.didChangeDependencies();
-    getCategoryList();
-  }
-
+class AddOnCategoryListState extends State<AddOnCategoryList> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -57,7 +26,8 @@ class CategoryListState extends State<CategoryList> {
         backgroundColor: kAppBarColor,
         appBar: AppBar(
             backgroundColor: Colors.white,
-            title: Text("All Category", style: TextStyle(color: Colors.black))),
+            title: Text("All Addon Category",
+                style: TextStyle(color: Colors.black))),
         body: Scaffold(
           body: Column(
             children: [
@@ -73,32 +43,7 @@ class CategoryListState extends State<CategoryList> {
         ));
   }
 
-  Widget dialogBox() {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      elevation: 5,
-      backgroundColor: Colors.transparent,
-      child: ListView(
-        children: [Text("Edit"), Text("Delete")],
-      ),
-    );
-  }
-
-  Widget _buildCategoryList() {
-    return GridView.builder(
-      gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-      physics: const BouncingScrollPhysics(),
-      itemBuilder: (context, index) {
-        return CategoryCard(categoryList.elementAt(index));
-      },
-      itemCount: categoryList.length,
-    );
-  }
-
-  Widget CategoryCard(Data elementAt) {
+  Widget CategoryCard() {
     return CustomContainer(
       margin: EdgeInsets.fromLTRB(10, 5, 10, 5),
       width: double.infinity,
@@ -122,17 +67,12 @@ class CategoryListState extends State<CategoryList> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => CategoryForm(
-                                    elementAt,
-                                  )),
+                              builder: (context) => AddOnCategoryForm()),
                         );
                       },
-                      child: Container(
-                        width: double.infinity,
-                        child: Text(
-                          "Edit",
-                          style: TextStyle(color: Colors.black, fontSize: 20),
-                        ),
+                      child: Text(
+                        "Edit",
+                        style: TextStyle(color: Colors.black, fontSize: 20),
                       ),
                     ),
                     SizedBox(
@@ -166,16 +106,18 @@ class CategoryListState extends State<CategoryList> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               MyCachedNetworkImage(
-                  borderRadius: 5,
-                  width: 80,
-                  height: 80,
-                  padding: EdgeInsets.all(10),
-                  url: elementAt.thumbnail),
+                borderRadius: 5,
+                width: 80,
+                height: 80,
+                padding: EdgeInsets.all(10),
+                url:
+                    "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/delish-homemade-pizza-horizontal-1542312378.png",
+              ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    elementAt.name,
+                    "Pizza & Sandwich",
                     style: TextStyle(
                         color: Colors.black,
                         fontSize: 16,
@@ -187,7 +129,7 @@ class CategoryListState extends State<CategoryList> {
                       margin: EdgeInsets.fromLTRB(15, 0, 15, 0),
                       child: Center(
                         child: Text(
-                          elementAt.description,
+                          "This description is test description , This description is test description",
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -207,16 +149,85 @@ class CategoryListState extends State<CategoryList> {
           Column(
             children: [
               Center(
-                  child: Text(elementAt.status,
+                  child: Text("Active",
                       style: TextStyle(
                           color: Colors.green, fontWeight: FontWeight.bold))),
               Center(
-                  child: Text(elementAt.dateCreated,
+                  child: Text("Updated at 10 Jan 2020",
                       style: TextStyle(color: Colors.grey)))
             ],
           )
+          // Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          //   ClipOval(
+          //     child: Material(
+          //       color: kAccentColor, // button color
+          //       child: InkWell(
+          //         // inkwell color
+          //         child: SizedBox(
+          //             width: 35,
+          //             height: 35,
+          //             child: Icon(
+          //               Icons.edit,
+          //               size: 20,
+          //               color: Colors.white,
+          //             )),
+          //         onTap: () {
+          //           Navigator.push(
+          //             context,
+          //             MaterialPageRoute(builder: (context) => CategoryForm()),
+          //           );
+          //         },
+          //       ),
+          //     ),
+          //   ),
+          //   SizedBox(
+          //     width: 10,
+          //   ),
+          //   ClipOval(
+          //     child: Material(
+          //       color: kAccentColor, // button color
+          //       child: InkWell(
+          //         // inkwell color
+          //         child: SizedBox(
+          //             width: 35,
+          //             height: 35,
+          //             child: Icon(
+          //               Icons.delete,
+          //               size: 20,
+          //               color: Colors.white,
+          //             )),
+          //         onTap: () {},
+          //       ),
+          //     ),
+          //   ),
+          // ]),
         ],
       ),
+    );
+  }
+
+  Widget dialogBox() {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      elevation: 5,
+      backgroundColor: Colors.transparent,
+      child: ListView(
+        children: [Text("Edit"), Text("Delete")],
+      ),
+    );
+  }
+
+  Widget _buildCategoryList() {
+    return GridView.builder(
+      gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+      physics: const BouncingScrollPhysics(),
+      itemBuilder: (context, index) {
+        return CategoryCard();
+      },
+      itemCount: 30,
     );
   }
 }

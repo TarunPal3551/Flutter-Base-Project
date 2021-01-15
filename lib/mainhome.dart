@@ -12,7 +12,10 @@ class MainHomeState extends State<MainHome> {
     // TODO: implement build
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home"),
+        title: Text(
+          _widgetTittle[_selectedIndex],
+          style: TextStyle(color: kAccentColor),
+        ),
         backgroundColor: Colors.white,
       ),
       backgroundColor: kAppBarColor,
@@ -23,12 +26,12 @@ class MainHomeState extends State<MainHome> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Business',
+            icon: Icon(Icons.assessment),
+            label: 'Orders',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            label: 'School',
+            icon: Icon(Icons.account_box),
+            label: 'Account',
           ),
         ],
         currentIndex: _selectedIndex,
@@ -41,6 +44,7 @@ class MainHomeState extends State<MainHome> {
 
   int _selectedIndex = 0;
   final _widgetOptions = [HomePage(), OrderPage(), AccountPage()];
+  final _widgetTittle = ["Home", "All Orders", "Account"];
 
   void _onItemTapped(int index) {
     setState(() {

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kmerchant/models/selection_model.dart';
 import 'package:kmerchant/ui/components/custom_containers.dart';
+import 'package:kmerchant/ui/screens/addoncategory_list.dart';
 import 'package:kmerchant/ui/screens/category_form.dart';
 import 'package:kmerchant/ui/screens/category_list.dart';
 
@@ -20,10 +21,17 @@ class CategoryCard extends StatelessWidget {
       shadowColor: category.color,
       borderRadius: 15,
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => CategoryList()),
-        );
+        if (category.id == 1) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CategoryList()),
+          );
+        } else if (category.id == 2) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddOnCategoryList()),
+          );
+        }
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

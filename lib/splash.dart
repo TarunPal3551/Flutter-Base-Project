@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:kmerchant/mainhome.dart';
 import 'package:kmerchant/splashcontroller.dart';
 import 'package:kmerchant/theme.dart';
+import 'package:kmerchant/ui/screens/login.dart';
 
 import 'helper/constants.dart';
 
@@ -22,12 +23,12 @@ class SplashScreen extends StatelessWidget {
         initState: (_) {
           Get.put(SplashController()).handleStartUpLogic().then((value) {
             //checkForUpdate(_);
-            // if (ACCESS_TOKEN == null) {
-            //   Get.offAll(MainHome());
-            // } else {
-            //   Get.offAll(MainHome());
-            // }
-            Get.offAll(MainHome());
+            if (ACCESS_TOKEN == null) {
+              Get.offAll(LoginScreen());
+            } else {
+              Get.offAll(MainHome());
+            }
+            // Get.offAll(MainHome());
           });
         },
         builder: (_) => Scaffold(

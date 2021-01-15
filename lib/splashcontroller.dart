@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -7,6 +9,7 @@ import 'package:kmerchant/services/push_notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'api/repository.dart';
+import 'helper/app_utils.dart';
 import 'helper/constants.dart';
 import 'services/device_service.dart';
 
@@ -29,16 +32,31 @@ class SplashController extends GetxController {
 
     await initToken();
 
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
-        .then((value) {
-      LATITUDE = value.latitude;
-      LONGITUDE = value.longitude;
-    });
+    String deviceId = await AppUtils.getId();
+    DEVICE_ID = deviceId;
+    String platformType = "unknown";
+    if (Platform.isAndroid) {
+      platformType = "android";
+    } else if (Platform.isIOS) {
+      platformType = "ios";
+    } else {
+      platformType = "flutter-other";
+    }
+    try {
+      await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high)
+          .then((value) {
+        LATITUDE = value.latitude;
+        LONGITUDE = value.longitude;
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   initToken() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    ACCESS_TOKEN = pref.getString("token");
+    ACCESS_TOKEN = pref.getString("ACCESS_TOKEN");
   }
 
   // Future<CheckUpdate> checkForUpdate() async {
