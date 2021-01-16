@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:kmerchant/models/selection_model.dart';
 import 'package:kmerchant/ui/components/custom_containers.dart';
 import 'package:kmerchant/ui/screens/addoncategory_list.dart';
+import 'package:kmerchant/ui/screens/addonitems_list.dart';
 import 'package:kmerchant/ui/screens/category_form.dart';
 import 'package:kmerchant/ui/screens/category_list.dart';
+import 'package:kmerchant/ui/screens/fooditems_list.dart';
 
 class CategoryCard extends StatelessWidget {
   final SelectionCategory category;
@@ -29,7 +31,17 @@ class CategoryCard extends StatelessWidget {
         } else if (category.id == 2) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddOnCategoryList()),
+            MaterialPageRoute(builder: (context) => AddonCategoryList()),
+          );
+        } else if (category.id == 3) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddonItemsList()),
+          );
+        } else if (category.id == 4) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => FoodItemsList()),
           );
         }
       },

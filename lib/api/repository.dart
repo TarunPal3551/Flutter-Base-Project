@@ -8,10 +8,16 @@ import 'package:kmerchant/helper/constants.dart';
 import 'package:kmerchant/helper/shared_pref_helper.dart';
 
 import 'package:dio/dio.dart';
+import 'package:kmerchant/models/addoncategory.dart' as addoncategory;
+import 'package:kmerchant/models/addoncategory.dart';
+import 'package:kmerchant/models/addonitem.dart';
+import 'package:kmerchant/models/addonitem.dart' as addonitem;
 import 'package:kmerchant/models/apiresponse.dart';
 import 'package:kmerchant/models/baseresponse.dart';
+import 'package:kmerchant/models/itemcategory.dart' as itemcategory;
 import 'package:kmerchant/models/itemcategory.dart';
 import 'package:kmerchant/models/loginresponse.dart';
+import 'package:kmerchant/models/uploadresponse.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class Repository {
@@ -112,8 +118,467 @@ class Repository {
     }
   }
 
-  Future<BaseResponse> editItemCategory(Data categoryData, File categoryImage,
-      String tittle, String description) async {
+  Future<BaseResponse> editItemCategory(
+      itemcategory.Data categoryData,
+      String categoryImage,
+      String url,
+      String tittle,
+      String description,
+      String isChecked) async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+        "category_name": tittle,
+        "category_description": description,
+        "upload_option_name": "photo",
+        "upload_next_action": "display_image",
+        "upload_type": "1",
+        "photo": categoryImage,
+        "thumbnail": url,
+        "status": isChecked,
+        "id": categoryData.id
+      };
+
+      final res = await _dio.post("api/AddCategory", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('Item Category Response:$response');
+        return BaseResponse.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<BaseResponse> deleteCategory(String id) async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+        "id": id
+      };
+
+      final res = await _dio.post("api/CategoryDelete", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('Category Delete Response:$response');
+        return BaseResponse.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<AddonCategory> getAddonItemCategory() async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+      };
+
+      final res = await _dio.post("api/getAddonList", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('Addon Item Category Response:$response');
+
+        return AddonCategory.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<BaseResponse> editAddonItemCategory(addoncategory.Data categoryData,
+      String tittle, String description, String isChecked) async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+        "subcategory_name": tittle,
+        "subcategory_description": description,
+        "status": isChecked,
+        "id": categoryData.id
+      };
+
+      final res = await _dio.post("api/AddAddon", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('Item Category Response:$response');
+        return BaseResponse.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<BaseResponse> deleteAddonCategory(String id) async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+        "id": id
+      };
+
+      final res = await _dio.post("api/AddonDelete", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('Category Delete Response:$response');
+        return BaseResponse.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<AddonItem> getAddonItem() async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+      };
+
+      final res = await _dio.post("api/getAddonList", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('Addon Item Category Response:$response');
+
+        return AddonItem.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<BaseResponse> editAddonItem(
+      addonitem.Data categoryData,
+      String categoryImage,
+      String url,
+      String tittle,
+      String description,
+      String price,
+      Map<String, String> selectedCategory,
+      String isChecked) async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+        "sub_item_name": tittle,
+        "item_description": description,
+        "price": price,
+        "addoncat_list": selectedCategory.length.toString() + " selected",
+        "upload_option_name": "photo",
+        "upload_next_action": "display_image",
+        "upload_type": "1",
+        "photo": categoryImage,
+        "thumbnail": url,
+        "status": isChecked,
+        "id": categoryData.id,
+      };
+      data.addAll(selectedCategory);
+
+      final res = await _dio.post("api/AddAddonItem", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('Item Category Response:$response');
+        return BaseResponse.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<BaseResponse> deleteAddonItem(String id) async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+        "id": id
+      };
+
+      final res = await _dio.post("api/AddonItemDelete", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('AddonItemDelete Response:$response');
+        return BaseResponse.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<AddonItem> getFoodItems() async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+      };
+
+      final res = await _dio.post("api/ItemList", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('Item Category Response:$response');
+
+        return AddonItem.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<BaseResponse> editFoodItem(
+      addonitem.Data categoryData,
+      String categoryImage,
+      String url,
+      String tittle,
+      String description,
+      String price,
+      Map<String, String> selectedCategory,
+      String isChecked) async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+        "sub_item_name": tittle,
+        "item_description": description,
+        "price": price,
+        "addoncat_list": selectedCategory.length.toString() + " selected",
+        "upload_option_name": "photo",
+        "upload_next_action": "display_image",
+        "upload_type": "1",
+        "photo": categoryImage,
+        "thumbnail": url,
+        "status": isChecked,
+        "id": categoryData.id,
+      };
+      data.addAll(selectedCategory);
+
+      final res = await _dio.post("api/AddAddonItem", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('Item Category Response:$response');
+        return BaseResponse.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<BaseResponse> deleteFoodItem(String id) async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+        "id": id
+      };
+
+      final res = await _dio.post("api/ItemDelete", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('AddonItemDelete Response:$response');
+        return BaseResponse.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
+  Future<UploadResponse> uploadFile(File categoryImage) async {
     try {
       String deviceId = await AppUtils.getId();
       DEVICE_ID = deviceId;
@@ -134,7 +599,7 @@ class Repository {
         dataImage = null;
       }
 
-      var data = {
+      var data = FormData.fromMap({
         "device_id": FCM_TOKEN,
         "device_platform": platformType,
         "device_uiid": deviceId,
@@ -142,21 +607,17 @@ class Repository {
         "merchant_token": ACCESS_TOKEN,
         "api_key": API_KEY,
         "lang": lang,
-        "category_name": tittle,
-        "category_description": description,
         "upload_option_name": "photo",
         "upload_next_action": "display_image",
-        "upload_type": "1",
-        "photo": dataImage,
-        "status": categoryData.status,
-        "id": categoryData.id
-      };
+        "upload_type": "2",
+        "file": dataImage
+      });
 
-      final res = await _dio.post("api/AddCategory", data: data);
+      final res = await _dio.post("/api/UploadFile", data: data);
       if (res.statusCode >= 200 && res.statusCode < 300) {
         final response = ApiResponse.fromJsonString(res.data);
-        print('Item Category Response:$response');
-        return BaseResponse.fromJson(response.data);
+        print('Upload Response:$response');
+        return UploadResponse.fromJson(response.data);
       } else {
         return null;
       }

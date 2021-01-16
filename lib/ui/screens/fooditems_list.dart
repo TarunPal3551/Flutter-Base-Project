@@ -8,17 +8,17 @@ import 'package:kmerchant/ui/screens/category_form.dart';
 
 import '../../theme.dart';
 
-class AddOnCategoryList extends StatefulWidget {
+class FoodItemsList extends StatefulWidget {
   static const id = 'category_screen';
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return AddOnCategoryListState();
+    return FoodItemsListState();
   }
 }
 
-class AddOnCategoryListState extends State<AddOnCategoryList> {
+class FoodItemsListState extends State<FoodItemsList> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -64,11 +64,11 @@ class AddOnCategoryListState extends State<AddOnCategoryList> {
                   children: <Widget>[
                     InkWell(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => AddOnCategoryForm()),
-                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //       builder: (context) => AddOnCategoryForm()),
+                        // );
                       },
                       child: Text(
                         "Edit",

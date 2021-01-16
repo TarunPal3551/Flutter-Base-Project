@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/sockets/src/socket_notifier.dart';
 import 'package:kmerchant/controllers/itemcategory_controller.dart';
 import 'package:kmerchant/models/itemcategory.dart';
 import 'package:kmerchant/ui/components/cached_network_image.dart';
@@ -54,6 +57,23 @@ class CategoryListState extends State<CategoryList> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: Center(
+            child: Icon(Icons.add),
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => CategoryForm(
+                        Data(),
+                      )),
+            ).then((value) {
+              categoryList.clear();
+              getCategoryList();
+            });
+          },
+        ),
         backgroundColor: kAppBarColor,
         appBar: AppBar(
             backgroundColor: Colors.white,
@@ -98,6 +118,28 @@ class CategoryListState extends State<CategoryList> {
     );
   }
 
+  void deleteCategory(String id) {
+    Get.dialog(LoadingDialog(), barrierDismissible: false);
+    categoryController.deleteCategory(id).then((value) {
+      if (value != null) {
+        if (Get.isDialogOpen) Get.back();
+        Get.snackbar(value.msg, "Request Success",
+            backgroundColor: Colors.green[700],
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+        categoryList.clear();
+        getCategoryList();
+      } else {
+        Get.snackbar("Failed", "Something went wrong",
+            backgroundColor: Colors.red[700],
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+      }
+    });
+  }
+
   Widget CategoryCard(Data elementAt) {
     return CustomContainer(
       margin: EdgeInsets.fromLTRB(10, 5, 10, 5),
@@ -119,13 +161,17 @@ class CategoryListState extends State<CategoryList> {
                   children: <Widget>[
                     InkWell(
                       onTap: () {
+                        Get.back();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => CategoryForm(
                                     elementAt,
                                   )),
-                        );
+                        ).then((value) {
+                          categoryList.clear();
+                          getCategoryList();
+                        });
                       },
                       child: Container(
                         width: double.infinity,
@@ -142,9 +188,18 @@ class CategoryListState extends State<CategoryList> {
                     SizedBox(
                       height: 5,
                     ),
-                    Text(
-                      "Delete",
-                      style: TextStyle(color: Colors.black, fontSize: 20),
+                    InkWell(
+                      onTap: () {
+                        Get.back();
+                        deleteCategory(elementAt.id);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        child: Text(
+                          "Delete",
+                          style: TextStyle(color: Colors.black, fontSize: 20),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -218,6 +273,17 @@ class CategoryListState extends State<CategoryList> {
         ],
       ),
     );
+  }
+}
+
+class NewWidget extends StatelessWidget {
+  const NewWidget({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return NewWidget();
   }
 }
 

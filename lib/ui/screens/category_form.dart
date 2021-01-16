@@ -58,16 +58,45 @@ class CategoryFormState extends State<CategoryForm> {
     setState(() {});
   }
 
-  void submitData(
-      Data categoryDetails, File image, String tittle, String description) {
+  void uploadImage(File _categoryImage, Data categoryDetails, String tittle,
+      String description, bool isChecked) async {
     Get.dialog(LoadingDialog(), barrierDismissible: false);
+    var value = await categoryController.uploadImage(_categoryImage);
+    if (value != null) {
+      if (value.code == "1") {
+        submitData(widget.categoryDetails, value.filename, value.fileUrl,
+            tittle, description, isChecked);
+      } else {
+        if (Get.isDialogOpen) Get.back();
+        Get.snackbar("Failed", "Something went wrong",
+            backgroundColor: Colors.red[700],
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+      }
+    } else {
+      if (Get.isDialogOpen) Get.back();
+      Get.snackbar("Failed", "Something went wrong",
+          backgroundColor: Colors.red[700],
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+    }
+  }
 
+  void submitData(Data categoryDetails, String imageName, String thumbnailsUrl,
+      String tittle, String description, bool isChecked) {
     categoryController
-        .submitCategory(widget.categoryDetails, image, tittle, description)
+        .submitCategory(widget.categoryDetails, imageName, thumbnailsUrl,
+            tittle, description, isChecked)
         .then((value) {
       if (Get.isDialogOpen) Get.back();
       if (value != null) {
-        Get.back();
+        Get.snackbar(value.msg, "Request Success",
+            backgroundColor: Colors.green[700],
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
       } else {
         Get.snackbar("Failed", "Something went wrong",
             backgroundColor: Colors.red[700],
@@ -123,17 +152,33 @@ class CategoryFormState extends State<CategoryForm> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _categoryImage == null
-                        ? MyCachedNetworkImage(
-                            borderRadius: 5,
-                            width: 100,
-                            height: 100,
-                            url: widget.categoryDetails.thumbnail)
-                        : CustomContainer(
-                            width: 100,
-                            height: 100,
-                            child: Image.file(_categoryImage),
-                          ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    widget.categoryDetails.thumbnail != null &&
+                            widget.categoryDetails.thumbnail != ""
+                        ? _categoryImage == null
+                            ? MyCachedNetworkImage(
+                                borderRadius: 5,
+                                width: 100,
+                                height: 100,
+                                url: widget.categoryDetails.thumbnail)
+                            : CustomContainer(
+                                width: 100,
+                                height: 100,
+                                child: Image.file(_categoryImage),
+                              )
+                        : _categoryImage != null
+                            ? CustomContainer(
+                                width: 100,
+                                height: 100,
+                                child: Image.file(_categoryImage),
+                              )
+                            : CustomContainer(
+                                width: 100,
+                                height: 100,
+                                child: Icon(Icons.photo),
+                              ),
                     Container(
                       margin: EdgeInsets.fromLTRB(0, 15, 0, 0),
                       child: InkWell(
@@ -166,7 +211,6 @@ class CategoryFormState extends State<CategoryForm> {
                   labelText: "Tittle",
                   onChanged: (value) {
                     tittle = value;
-                    _tittleController.text = value;
                   },
                 ),
                 SizedBox(height: 50),
@@ -198,8 +242,18 @@ class CategoryFormState extends State<CategoryForm> {
                 SizedBox(height: 25),
                 CustomContainer(
                     onTap: () {
-                      submitData(widget.categoryDetails, _categoryImage, tittle,
-                          description);
+                      if (_categoryImage != null) {
+                        uploadImage(_categoryImage, widget.categoryDetails,
+                            tittle, description, isChecked);
+                      } else {
+                        submitData(
+                            widget.categoryDetails,
+                            null,
+                            widget.categoryDetails.thumbnail,
+                            tittle,
+                            description,
+                            isChecked);
+                      }
                     },
                     height: 50,
                     backgroundColor: kAccentColor,

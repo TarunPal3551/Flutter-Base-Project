@@ -1,9 +1,14 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:kmerchant/controllers/itemcategory_controller.dart';
+import 'package:kmerchant/models/addonitem.dart';
 import 'package:kmerchant/ui/components/cached_network_image.dart';
 import 'package:kmerchant/ui/components/custom_containers.dart';
+import 'package:kmerchant/ui/components/loading_dialog.dart';
 import 'package:kmerchant/ui/components/my_textfields.dart';
 
 import '../../theme.dart';
@@ -11,21 +16,33 @@ import 'package:image_picker/image_picker.dart';
 
 class AddOnItemsForm extends StatefulWidget {
   static const id = 'category_form';
+  final Data categoryDetails;
+  Map<String, String> selectedCategory;
+
+  ///Named Parameters
+
+  AddOnItemsForm(this.categoryDetails);
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return AddOnItemsState();
+    return AddOnItemsFormState();
   }
 }
 
-class AddOnItemsState extends State<AddOnItemsForm> {
+class AddOnItemsFormState extends State<AddOnItemsForm> {
   var _tittleController = TextEditingController(text: "");
   final _descController = TextEditingController(text: "");
-  bool isSwitched = false;
+  // bool isSwitched = false;
+  bool isChecked = false;
   File _categoryImage;
   bool _categorySelected = false;
   ImagePicker picker = ImagePicker();
+  ItemCategoryController categoryController = ItemCategoryController();
+
+  String tittle;
+
+  String description;
 
   @override
   void dispose() {
@@ -40,7 +57,84 @@ class AddOnItemsState extends State<AddOnItemsForm> {
     _categoryImage = File(selected.path);
     _categorySelected = true;
     setState(() {});
-    
+  }
+
+  void uploadImage(File _categoryImage, Data categoryDetails, String tittle,
+      String description, bool isChecked) async {
+    Get.dialog(LoadingDialog(), barrierDismissible: false);
+    var value = await categoryController.uploadImage(_categoryImage);
+    if (value != null) {
+      if (value.code == "1") {
+        submitData(widget.categoryDetails, value.filename, value.fileUrl,
+            tittle, description, isChecked, widget.selectedCategory);
+      } else {
+        if (Get.isDialogOpen) Get.back();
+        Get.snackbar("Failed", "Something went wrong",
+            backgroundColor: Colors.red[700],
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+      }
+    } else {
+      if (Get.isDialogOpen) Get.back();
+      Get.snackbar("Failed", "Something went wrong",
+          backgroundColor: Colors.red[700],
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM,
+          margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+    }
+  }
+
+  void submitData(
+      Data categoryDetails,
+      String imageName,
+      String thumbnailsUrl,
+      String tittle,
+      String description,
+      bool isChecked,
+      Map<String, String> selectedCategory) {
+    categoryController
+        .submitAddonItem(widget.categoryDetails, imageName, thumbnailsUrl,
+            tittle, description, "", selectedCategory, isChecked)
+        .then((value) {
+      if (Get.isDialogOpen) Get.back();
+      if (value != null) {
+        Get.snackbar(value.msg, "Request Success",
+            backgroundColor: Colors.green[700],
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+      } else {
+        Get.snackbar("Failed", "Something went wrong",
+            backgroundColor: Colors.red[700],
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.categoryDetails != null) {
+      description = widget.categoryDetails.description;
+      tittle = widget.categoryDetails.name;
+      _tittleController.text = tittle;
+      _descController.text = description;
+      if (widget.categoryDetails.status == "publish") {
+        isChecked = true;
+      } else {
+        isChecked = false;
+      }
+    } else {
+      description = "";
+      tittle = "";
+      _tittleController.text = tittle;
+      _descController.text = description;
+      isChecked = true;
+    }
   }
 
   @override
@@ -56,28 +150,42 @@ class AddOnItemsState extends State<AddOnItemsForm> {
           )),
       body: SafeArea(
         child: Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.all(10),
+          body: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
               children: [
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _categoryImage == null
-                        ? MyCachedNetworkImage(
-                            borderRadius: 5,
-                            width: 100,
-                            height: 100,
-                            url:
-                                "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/delish-homemade-pizza-horizontal-1542312378.png",
-                          )
-                        : CustomContainer(
-                            width: 100,
-                            height: 100,
-                            child: Image.file(_categoryImage),
-                          ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    widget.categoryDetails.thumbnail != null &&
+                            widget.categoryDetails.thumbnail != ""
+                        ? _categoryImage == null
+                            ? MyCachedNetworkImage(
+                                borderRadius: 5,
+                                width: 100,
+                                height: 100,
+                                url: widget.categoryDetails.thumbnail)
+                            : CustomContainer(
+                                width: 100,
+                                height: 100,
+                                child: Image.file(_categoryImage),
+                              )
+                        : _categoryImage != null
+                            ? CustomContainer(
+                                width: 100,
+                                height: 100,
+                                child: Image.file(_categoryImage),
+                              )
+                            : CustomContainer(
+                                width: 100,
+                                height: 100,
+                                child: Icon(Icons.photo),
+                              ),
                     Container(
                       margin: EdgeInsets.fromLTRB(0, 15, 0, 0),
                       child: InkWell(
@@ -108,26 +216,31 @@ class AddOnItemsState extends State<AddOnItemsForm> {
                   controller: _tittleController,
                   keyboardType: TextInputType.name,
                   labelText: "Tittle",
+                  onChanged: (value) {
+                    tittle = value;
+                  },
                 ),
-                SizedBox(height: 25),
+                SizedBox(height: 50),
                 MyTextField(
                   margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
                   controller: _descController,
                   keyboardType: TextInputType.name,
                   labelText: "Description",
+                  onChanged: (value) {
+                    description = value;
+                  },
                 ),
                 SizedBox(height: 25),
                 Switch(
-                  value: isSwitched,
+                  value: isChecked,
                   onChanged: (value) {
                     setState(() {
-                      isSwitched = value;
-                      print(isSwitched);
+                      isChecked = value;
                     });
                   },
                 ),
                 Text(
-                  isSwitched == true ? "Active" : "Disabled",
+                  isChecked == true ? "Active" : "Disabled",
                   style: TextStyle(
                       fontSize: 20,
                       color: Colors.black,
@@ -135,6 +248,15 @@ class AddOnItemsState extends State<AddOnItemsForm> {
                 ),
                 SizedBox(height: 25),
                 CustomContainer(
+                    onTap: () {
+                      if (_categoryImage != null) {
+                        uploadImage(_categoryImage, widget.categoryDetails,
+                            tittle, description, isChecked);
+                      } else {
+                        submitData(widget.categoryDetails, "", "", tittle,
+                            description, isChecked, widget.selectedCategory);
+                      }
+                    },
                     height: 50,
                     backgroundColor: kAccentColor,
                     width: 200,

@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/sockets/src/socket_notifier.dart';
 import 'package:kmerchant/controllers/itemcategory_controller.dart';
-import 'package:kmerchant/models/itemcategory.dart';
+import 'package:kmerchant/models/addoncategory.dart';
 import 'package:kmerchant/ui/components/cached_network_image.dart';
 import 'package:kmerchant/ui/components/custom_containers.dart';
 import 'package:kmerchant/ui/components/loading_dialog.dart';
@@ -12,21 +15,41 @@ import 'package:kmerchant/ui/screens/category_form.dart';
 
 import '../../theme.dart';
 
-class AddOnCategoryList extends StatefulWidget {
+class AddonCategoryList extends StatefulWidget {
   static const id = 'category_screen';
 
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
-    return AddOnCategoryListState();
+    return AddonCategoryListState();
   }
 }
 
-class AddOnCategoryListState extends State<AddOnCategoryList> {
-  List<Data> categoryList;
+class AddonCategoryListState extends State<AddonCategoryList> {
+  List<Data> categoryList = List();
   ItemCategoryController categoryController = ItemCategoryController();
+
+  void getCategoryList() {
+    categoryController.getAllAddonCategory().then((value) {
+      if (value != null) {
+        if (Get.isDialogOpen) Get.back();
+        categoryList = value.data;
+        //Get.offAndToNamed(MyHomePage.id);
+        setState(() {});
+      } else {
+        if (Get.isDialogOpen) Get.back();
+        Get.snackbar("Loading Failed", "No Data Found",
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+      }
+    });
+  }
+
   @override
   void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     getCategoryList();
   }
@@ -35,6 +58,23 @@ class AddOnCategoryListState extends State<AddOnCategoryList> {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: Center(
+            child: Icon(Icons.add),
+          ),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => AddOnCategoryForm(
+                        Data(),
+                      )),
+            ).then((value) {
+              categoryList.clear();
+              getCategoryList();
+            });
+          },
+        ),
         backgroundColor: kAppBarColor,
         appBar: AppBar(
             backgroundColor: Colors.white,
@@ -55,18 +95,46 @@ class AddOnCategoryListState extends State<AddOnCategoryList> {
         ));
   }
 
-  void getCategoryList() {
+  Widget dialogBox() {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      elevation: 5,
+      backgroundColor: Colors.transparent,
+      child: ListView(
+        children: [Text("Edit"), Text("Delete")],
+      ),
+    );
+  }
+
+  Widget _buildCategoryList() {
+    return GridView.builder(
+      gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+      physics: const BouncingScrollPhysics(),
+      itemBuilder: (context, index) {
+        return CategoryCard(categoryList.elementAt(index));
+      },
+      itemCount: categoryList.length,
+    );
+  }
+
+  void deleteCategory(String id) {
     Get.dialog(LoadingDialog(), barrierDismissible: false);
-    categoryController.getAllItemCategory().then((value) {
+    categoryController.deleteCategory(id).then((value) {
       if (value != null) {
         if (Get.isDialogOpen) Get.back();
-        categoryList = value.data;
-        //Get.offAndToNamed(MyHomePage.id);
-        setState(() {});
+        Get.snackbar(value.msg, "Request Success",
+            backgroundColor: Colors.green[700],
+            colorText: Colors.white,
+            snackPosition: SnackPosition.BOTTOM,
+            margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
+        categoryList.clear();
+        getCategoryList();
       } else {
-        if (Get.isDialogOpen) Get.back();
-        Get.snackbar("Loading Failed", "No Data Found",
-            backgroundColor: Colors.red,
+        Get.snackbar("Failed", "Something went wrong",
+            backgroundColor: Colors.red[700],
             colorText: Colors.white,
             snackPosition: SnackPosition.BOTTOM,
             margin: EdgeInsets.fromLTRB(20, 20, 20, 20));
@@ -95,15 +163,24 @@ class AddOnCategoryListState extends State<AddOnCategoryList> {
                   children: <Widget>[
                     InkWell(
                       onTap: () {
+                        Get.back();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => AddOnCategoryForm()),
-                        );
+                              builder: (context) => AddOnCategoryForm(
+                                    elementAt,
+                                  )),
+                        ).then((value) {
+                          categoryList.clear();
+                          getCategoryList();
+                        });
                       },
-                      child: Text(
-                        "Edit",
-                        style: TextStyle(color: Colors.black, fontSize: 20),
+                      child: Container(
+                        width: double.infinity,
+                        child: Text(
+                          "Edit",
+                          style: TextStyle(color: Colors.black, fontSize: 20),
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -113,9 +190,18 @@ class AddOnCategoryListState extends State<AddOnCategoryList> {
                     SizedBox(
                       height: 5,
                     ),
-                    Text(
-                      "Delete",
-                      style: TextStyle(color: Colors.black, fontSize: 20),
+                    InkWell(
+                      onTap: () {
+                        Get.back();
+                        deleteCategory(elementAt.id);
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        child: Text(
+                          "Delete",
+                          style: TextStyle(color: Colors.black, fontSize: 20),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -190,30 +276,16 @@ class AddOnCategoryListState extends State<AddOnCategoryList> {
       ),
     );
   }
+}
 
-  Widget dialogBox() {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      elevation: 5,
-      backgroundColor: Colors.transparent,
-      child: ListView(
-        children: [Text("Edit"), Text("Delete")],
-      ),
-    );
-  }
+class NewWidget extends StatelessWidget {
+  const NewWidget({
+    Key key,
+  }) : super(key: key);
 
-  Widget _buildCategoryList() {
-    return GridView.builder(
-      gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-      physics: const BouncingScrollPhysics(),
-      itemBuilder: (context, index) {
-        return CategoryCard(categoryList.elementAt(index));
-      },
-      itemCount: categoryList.length,
-    );
+  @override
+  Widget build(BuildContext context) {
+    return NewWidget();
   }
 }
 
