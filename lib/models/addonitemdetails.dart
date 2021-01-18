@@ -1,17 +1,16 @@
-class AddonItem {
+class AddonItemDetails {
   int code;
   String msg;
   Details details;
   Post post;
 
-  AddonItem({this.code, this.msg, this.details, this.post});
+  AddonItemDetails({this.code, this.msg, this.details, this.post});
 
-  AddonItem.fromJson(Map<String, dynamic> json) {
+  AddonItemDetails.fromJson(Map<String, dynamic> json) {
     code = json['code'];
     msg = json['msg'];
     details =
         json['details'] != null ? new Details.fromJson(json['details']) : null;
-
     post = json['post'] != null ? new Post.fromJson(json['post']) : null;
   }
 
@@ -22,7 +21,6 @@ class AddonItem {
     if (this.details != null) {
       data['details'] = this.details.toJson();
     }
-
     if (this.post != null) {
       data['post'] = this.post.toJson();
     }
@@ -32,69 +30,75 @@ class AddonItem {
 
 class Details {
   String nextAction;
-  int refresh;
-  List<Data> data;
+  String formId;
+  Data data;
 
-  Details({this.nextAction, this.refresh, this.data});
+  Details({this.nextAction, this.formId, this.data});
 
   Details.fromJson(Map<String, dynamic> json) {
     nextAction = json['next_action'];
-    refresh = json['refresh'];
-    if (json['data'] != null) {
-      data = new List<Data>();
-      json['data'].forEach((v) {
-        data.add(new Data.fromJson(v));
-      });
-    }
+    formId = json['form_id'];
+    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['next_action'] = this.nextAction;
-    data['refresh'] = this.refresh;
+    data['form_id'] = this.formId;
     if (this.data != null) {
-      data['data'] = this.data.map((v) => v.toJson()).toList();
+      data['data'] = this.data.toJson();
     }
     return data;
   }
 }
 
 class Data {
-  String id;
-  String name;
-  String description;
-  String thumbnail;
+  String subItemId;
+  String subItemName;
+  String itemDescription;
   String price;
+  String thumbnail;
+  String photo;
+  List<String> category;
+  String status;
 
-  Data({
-    this.id,
-    this.name,
-    this.description,
-    this.thumbnail,
-    this.price,
-  });
+  Data(
+      {this.subItemId,
+      this.subItemName,
+      this.itemDescription,
+      this.price,
+      this.thumbnail,
+      this.photo,
+      this.category,
+      this.status});
 
   Data.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    description = json['description'];
-    thumbnail = json['thumbnail'];
+    subItemId = json['sub_item_id'];
+    subItemName = json['sub_item_name'];
+    itemDescription = json['item_description'];
     price = json['price'];
+    thumbnail = json['thumbnail'];
+    photo = json['photo'];
+    category = json['category'].cast<String>();
+    status = json['status'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['description'] = this.description;
-    data['thumbnail'] = this.thumbnail;
+    data['sub_item_id'] = this.subItemId;
+    data['sub_item_name'] = this.subItemName;
+    data['item_description'] = this.itemDescription;
     data['price'] = this.price;
-
+    data['thumbnail'] = this.thumbnail;
+    data['photo'] = this.photo;
+    data['category'] = this.category;
+    data['status'] = this.status;
     return data;
   }
 }
 
 class Post {
+  String id;
   String deviceId;
   String devicePlatform;
   String deviceUiid;
@@ -104,7 +108,8 @@ class Post {
   String lang;
 
   Post(
-      {this.deviceId,
+      {this.id,
+      this.deviceId,
       this.devicePlatform,
       this.deviceUiid,
       this.codeVersion,
@@ -113,6 +118,7 @@ class Post {
       this.lang});
 
   Post.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
     deviceId = json['device_id'];
     devicePlatform = json['device_platform'];
     deviceUiid = json['device_uiid'];
@@ -124,6 +130,7 @@ class Post {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
     data['device_id'] = this.deviceId;
     data['device_platform'] = this.devicePlatform;
     data['device_uiid'] = this.deviceUiid;

@@ -8,6 +8,8 @@ const String BASE_URL =
 const String IMAGE_BASE =
     "http://restaurant.sikarwar1.xyz/restomulti/merchantappv2/";
 
+String codeVersion = "1";
+
 String ACCESS_TOKEN;
 String API_KEY = "test";
 String lang = "en";

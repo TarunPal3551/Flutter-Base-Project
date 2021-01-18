@@ -12,8 +12,11 @@ import 'package:kmerchant/models/addoncategory.dart' as addoncategory;
 import 'package:kmerchant/models/addoncategory.dart';
 import 'package:kmerchant/models/addonitem.dart';
 import 'package:kmerchant/models/addonitem.dart' as addonitem;
+import 'package:kmerchant/models/addonitemdetails.dart';
+import 'package:kmerchant/models/addonitemdetails.dart' as itemdetails;
 import 'package:kmerchant/models/apiresponse.dart';
 import 'package:kmerchant/models/baseresponse.dart';
+import 'package:kmerchant/models/fooditems.dart';
 import 'package:kmerchant/models/itemcategory.dart' as itemcategory;
 import 'package:kmerchant/models/itemcategory.dart';
 import 'package:kmerchant/models/loginresponse.dart';
@@ -342,7 +345,7 @@ class Repository {
         "lang": lang,
       };
 
-      final res = await _dio.post("api/getAddonList", data: data);
+      final res = await _dio.post("api/getAddonItemList", data: data);
       if (res.statusCode >= 200 && res.statusCode < 300) {
         final response = ApiResponse.fromJsonString(res.data);
         print('Addon Item Category Response:$response');
@@ -356,14 +359,51 @@ class Repository {
     }
   }
 
+  Future<AddonItemDetails> getAddonItemInfo(String id) async {
+    try {
+      String deviceId = await AppUtils.getId();
+      DEVICE_ID = deviceId;
+      String platformType = "unknown";
+      if (Platform.isAndroid) {
+        platformType = "android";
+      } else if (Platform.isIOS) {
+        platformType = "ios";
+      } else {
+        platformType = "flutter-other";
+      }
+      var data = {
+        "device_id": FCM_TOKEN,
+        "device_platform": platformType,
+        "device_uiid": deviceId,
+        "code_version": 1,
+        "merchant_token": ACCESS_TOKEN,
+        "api_key": API_KEY,
+        "lang": lang,
+        "id": id
+      };
+
+      final res = await _dio.post("api/AddonItemGetByID", data: data);
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final response = ApiResponse.fromJsonString(res.data);
+        print('Addon Item Category Response:$response');
+
+        return AddonItemDetails.fromJson(response.data);
+      } else {
+        return null;
+      }
+    } on DioError catch (e) {
+      print(e.error);
+    }
+  }
+
   Future<BaseResponse> editAddonItem(
-      addonitem.Data categoryData,
+      itemdetails.Data categoryData,
       String categoryImage,
       String url,
       String tittle,
       String description,
       String price,
-      Map<String, String> selectedCategory,
+      List<String> selectedCategory,
       String isChecked) async {
     try {
       String deviceId = await AppUtils.getId();
@@ -376,30 +416,34 @@ class Repository {
       } else {
         platformType = "flutter-other";
       }
+      final _formData = FormData.fromMap({});
+      _formData.fields.add(MapEntry('device_id', FCM_TOKEN));
+      _formData.fields.add(MapEntry('device_platform', platformType));
+      _formData.fields.add(MapEntry('device_uiid', deviceId));
+      _formData.fields.add(MapEntry('code_version', codeVersion));
+      _formData.fields.add(MapEntry('merchant_token', ACCESS_TOKEN));
+      _formData.fields.add(MapEntry('api_key', API_KEY));
+      _formData.fields.add(MapEntry('lang', lang));
+      _formData.fields.add(MapEntry('sub_item_name', tittle));
+      _formData.fields.add(MapEntry('item_description', description));
+      _formData.fields.add(MapEntry('price', price));
+      _formData.fields.add(MapEntry(
+          'addoncat_list', selectedCategory.length.toString() + " selected"));
+      _formData.fields.add(MapEntry('upload_next_action', "display_image"));
+      _formData.fields.add(MapEntry('upload_option_name', "photo"));
+      _formData.fields.add(MapEntry('upload_type', "1"));
+      _formData.fields.add(MapEntry('photo', categoryImage));
+      _formData.fields.add(MapEntry('thumbnail', url));
+      _formData.fields.add(MapEntry('status', isChecked));
+      if (categoryData.subItemId != null) {
+        _formData.fields.add(MapEntry('id', categoryData.subItemId));
+      }
 
-      var data = {
-        "device_id": FCM_TOKEN,
-        "device_platform": platformType,
-        "device_uiid": deviceId,
-        "code_version": 1,
-        "merchant_token": ACCESS_TOKEN,
-        "api_key": API_KEY,
-        "lang": lang,
-        "sub_item_name": tittle,
-        "item_description": description,
-        "price": price,
-        "addoncat_list": selectedCategory.length.toString() + " selected",
-        "upload_option_name": "photo",
-        "upload_next_action": "display_image",
-        "upload_type": "1",
-        "photo": categoryImage,
-        "thumbnail": url,
-        "status": isChecked,
-        "id": categoryData.id,
-      };
-      data.addAll(selectedCategory);
-
-      final res = await _dio.post("api/AddAddonItem", data: data);
+      for (int i = 0; i < selectedCategory.length; i++) {
+        _formData.fields
+            .add(MapEntry('category[]', selectedCategory.elementAt(i)));
+      }
+      final res = await _dio.post("api/AddAddonItem", data: _formData);
       if (res.statusCode >= 200 && res.statusCode < 300) {
         final response = ApiResponse.fromJsonString(res.data);
         print('Item Category Response:$response');
@@ -449,7 +493,7 @@ class Repository {
     }
   }
 
-  Future<AddonItem> getFoodItems() async {
+  Future<FoodItems> getFoodItems() async {
     try {
       String deviceId = await AppUtils.getId();
       DEVICE_ID = deviceId;
@@ -474,9 +518,9 @@ class Repository {
       final res = await _dio.post("api/ItemList", data: data);
       if (res.statusCode >= 200 && res.statusCode < 300) {
         final response = ApiResponse.fromJsonString(res.data);
-        print('Item Category Response:$response');
+        print('Foood Item  Response:$response');
 
-        return AddonItem.fromJson(response.data);
+        return FoodItems.fromJson(response.data);
       } else {
         return null;
       }

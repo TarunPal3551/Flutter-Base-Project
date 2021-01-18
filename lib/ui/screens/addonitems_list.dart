@@ -33,8 +33,9 @@ class AddonItemsListState extends State<AddonItemsList> {
       if (value != null) {
         if (Get.isDialogOpen) Get.back();
         categoryList = value.data;
-        //Get.offAndToNamed(MyHomePage.id);
         setState(() {});
+        //Get.offAndToNamed(MyHomePage.id);
+
       } else {
         if (Get.isDialogOpen) Get.back();
         Get.snackbar("Loading Failed", "No Data Found",
@@ -66,7 +67,7 @@ class AddonItemsListState extends State<AddonItemsList> {
               context,
               MaterialPageRoute(
                   builder: (context) => AddOnItemsForm(
-                        Data(),
+                        itemId: null,
                       )),
             ).then((value) {
               categoryList.clear();
@@ -167,11 +168,13 @@ class AddonItemsListState extends State<AddonItemsList> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => AddOnItemsForm(
-                                    elementAt,
+                                    itemId: elementAt.id,
                                   )),
                         ).then((value) {
-                          categoryList.clear();
-                          getCategoryList();
+                          if (value != null) {
+                            categoryList.clear();
+                            getCategoryList();
+                          }
                         });
                       },
                       child: Container(
@@ -263,12 +266,9 @@ class AddonItemsListState extends State<AddonItemsList> {
           Column(
             children: [
               Center(
-                  child: Text(elementAt.status,
+                  child: Text(elementAt.price,
                       style: TextStyle(
                           color: Colors.green, fontWeight: FontWeight.bold))),
-              Center(
-                  child: Text(elementAt.dateCreated,
-                      style: TextStyle(color: Colors.grey)))
             ],
           )
         ],

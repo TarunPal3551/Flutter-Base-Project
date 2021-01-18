@@ -11,8 +11,9 @@ import 'package:kmerchant/models/baseresponse.dart';
 import 'package:kmerchant/models/itemcategory.dart' as itemcategory;
 import 'package:kmerchant/models/itemcategory.dart';
 import 'package:kmerchant/models/addonitem.dart' as addonlist;
+import 'package:kmerchant/models/addonitemdetails.dart' as addoninfo;
 import 'package:kmerchant/models/uploadresponse.dart';
-
+import 'package:kmerchant/models/fooditems.dart' as fooditems;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ItemCategoryController extends GetxController {
@@ -23,6 +24,17 @@ class ItemCategoryController extends GetxController {
       var value = await repository.getItemCategory();
       if (value != null) {
         return value.details;
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<addoninfo.Data> getAddonInfo(String id) async {
+    try {
+      var value = await repository.getAddonItemInfo(id);
+      if (value != null) {
+        return value.details.data;
       }
     } catch (e) {
       print(e);
@@ -128,13 +140,13 @@ class ItemCategoryController extends GetxController {
   }
 
   Future<BaseResponse> submitAddonItem(
-      addonlist.Data categoryData,
+      addoninfo.Data categoryData,
       String imageName,
       String thumbnailsUrl,
       String tittle,
       String description,
       String price,
-      Map<String, String> selectedCategory,
+      List<String> selectedCategory,
       bool isChecked) async {
     try {
       String val = "publish";
@@ -153,9 +165,9 @@ class ItemCategoryController extends GetxController {
     }
   }
 
-  Future<itemcategory.Details> getAllFoodItems() async {
+  Future<fooditems.Details> getAllFoodItems() async {
     try {
-      var value = await repository.getItemCategory();
+      var value = await repository.getFoodItems();
       if (value != null) {
         return value.details;
       }
